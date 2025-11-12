@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Stav objednávek</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2em; background: #f9f9f9; }
+  h1 { color: #333; }
+  ul { list-style: none; padding: 0; }
+  li { padding: 0.5em 1em; margin-bottom: 0.5em; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
+  .Restaurace { color: #ff9800; }
+  .Rozváží { color: #2196f3; }
+  .Doručeno { color: #4caf50; }
+  form { margin-bottom: 1em; }
+  button { padding: 0.5em 1em; font-size: 1em; }
+</style>
+</head>
+<body>
+<h1>Seznam objednávek</h1>
+
+<form id="orderForm">
+  <button type="submit">Odeslat objednávku</button>
+</form>
+
+<ul id="orders"></ul>
+
+<script>
+// Funkce pro načtení aktuálních objednávek
+async function fetchOrders() {
+    try {
+        const response = await fetch('/orders');
+        const orders = await response.json();
+
+        const ul = document.getElementById('orders');
+        ul.innerHTML = '';
+
+        for (const [id, status] of Object.entries(orders)) {
+            const li = document.createElement('li');
+
+            let className = '';
+            if (status.includes('Restaurace')) className = 'Restaurace';
+            else if (status.includes('Rozváží')) className = 'Rozváží';
+            else if (status.includes('Doručeno')) className = 'Doručeno';
+
+            li.textContent = `${id}: ${status}`;
+            li.className = className;
+            ul.appendChild(li);
+        }
+    } catch (err) {
+        console.error('Chyba při načítání objednávek:', err);
+    }
+}
+
+// Polling každé 2 sekundy
+setInterval(fetchOrders, 2000);
+fetchOrders(); // okamžité první načtení
+
+// Čítač pro ID objednávek
+let orderCounter = 1;
+
+// Odesílání nové objednávky s číselným ID
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const orderId = orderCounter++; // ID začíná od 1 a postupně se zvyšuje
+
+    try {
+        const response = await fetch('/send-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: orderId })
+        });
+        if (response.ok) {
+            console.log(`Objednávka ${orderId} odeslána`);
+        } else {
+            console.error('Chyba při odesílání objednávky');
+        }
+    } catch (err) {
+        console.error('Chyba:', err);
+    }
+});
+</script>
+</body>
+</html>

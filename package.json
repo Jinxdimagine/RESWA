@@ -1,0 +1,17 @@
+{
+  "name": "res",
+  "version": "1.0.0",
+  "description": "",
+  "main": "kuryr.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0",
+    "node-fetch": "^2.7.0"
+  }
+}
